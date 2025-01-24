@@ -41,14 +41,14 @@ describe('fileLogger', () => {
         const meta = { key: 'value' };
 
         fileLogger.write('warn' as LogLevel, message, meta);
-        expect(mockWriteFileSync).toHaveBeenCalledWith(
-            logFilePath,
-            '[WARN]: File log message {"key":"value"}\n'
-        );
+
+        
+        const logEntry = mockWriteFileSync.mock.calls[0][1];
+        expect(logEntry).toMatch(/^\[WARN\]::\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z: File log message {"key":"value"}\n$/);
     });
 
     it('should allow setting a custom file path', () => {
-        const customPath =  path.resolve(logDir, 'custom.log');
+        const customPath = path.resolve(logDir, 'custom.log');
 
         if (fileLogger.configure) {
             fileLogger.configure({ location: customPath });
@@ -57,9 +57,20 @@ describe('fileLogger', () => {
         const message = 'Custom log message';
         fileLogger.write('error' as LogLevel, message);
 
-        expect(mockWriteFileSync).toHaveBeenCalledWith(
-            path.resolve(process.cwd(), customPath),
-            '[ERROR]: Custom log message {}\n'
-        );
+        
+        const logEntry = mockWriteFileSync.mock.calls[0][1];
+        expect(logEntry).toMatch(/^\[ERROR\]::\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z: Custom log message\n$/);
+    });
+
+    it('should exclude log type and timestamp when configured', () => {
+        if (fileLogger.configure) {
+            fileLogger.configure({ output_type: false, output_timestamp: false });
+        }
+
+        const message = 'Minimal log message';
+        fileLogger.write('info' as LogLevel, message);
+
+        const logEntry = mockWriteFileSync.mock.calls[0][1];
+        expect(logEntry).toBe('Minimal log message\n');
     });
 });

@@ -3,7 +3,7 @@
  * You may only use this work in compliance with the License.
  * You may obtain a copy of the License at:
  *
- * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ * https:
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed "as is",
@@ -23,20 +23,20 @@ import * as fs from 'fs';
 export function loadPlugins(): LoggerPlugin[] {
     const plugins: LoggerPlugin[] = [];
 
-    // Använd __dirname för att hämta rätt sökväg efter kompilering
+    
     const pluginsDir = path.resolve(__dirname, 'plugins');
 
-    // Kontrollera om katalogen för plugins existerar
+    
     if (fs.existsSync(pluginsDir)) {
         const files = fs.readdirSync(pluginsDir).filter((file) => file.endsWith('.js'));
 
         for (const file of files) {
             const pluginPath = path.join(pluginsDir, file);
-            const plugin = require(pluginPath); // Ladda plugin via CommonJS
+            const plugin = require(pluginPath); 
             if (plugin && plugin.default) {
                 const pluginInstance = plugin.default as LoggerPlugin;
 
-                // Dynamiskt sätt pluginType baserat på filnamnet
+                
                 const pluginType = path.basename(file, path.extname(file)).toLowerCase().replace('logger', '');
                 (pluginInstance as any).pluginType = pluginType;
 

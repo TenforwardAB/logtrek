@@ -3,7 +3,7 @@
  * You may only use this work in compliance with the License.
  * You may obtain a copy of the License at:
  *
- * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ * https:
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed "as is",
@@ -18,10 +18,42 @@
 
 import { LoggerPlugin, LogLevel } from '../types';
 
+let outputType = true; // Default value for output_type
+let outputTimestamp = true; // Default value for output_timestamp
+
 const consoleLogger: LoggerPlugin = {
     pluginType: 'console',
+    configure: (options: Record<string, any>) => {
+        if (options.output_type !== undefined) {
+            outputType = options.output_type;
+        }
+        if (options.output_timestamp !== undefined) {
+            outputTimestamp = options.output_timestamp;
+        }
+    },
     write: (level: LogLevel, message: string, meta?: Record<string, any>) => {
-        console.log(`[${level.toUpperCase()}]: ${message}`, meta || '');
+        const timestamp = new Date().toISOString();
+        let logEntry = '';
+
+        if (outputType) {
+            logEntry += `[${level.toUpperCase()}]`;
+        }
+
+        if (outputTimestamp) {
+            logEntry += `${outputType ? '::' : ''}${timestamp}`;
+        }
+
+        if (logEntry) {
+            logEntry += ': ';
+        }
+
+        logEntry += message;
+
+        if (meta && Object.keys(meta).length > 0) {
+            logEntry += ` ${JSON.stringify(meta)}`;
+        }
+
+        console.log(logEntry);
     },
 };
 

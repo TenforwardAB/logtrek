@@ -3,7 +3,7 @@
  * You may only use this work in compliance with the License.
  * You may obtain a copy of the License at:
  *
- * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ * https:
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed "as is",
@@ -26,11 +26,46 @@ describe('consoleLogger', () => {
         consoleSpy.mockClear();
     });
 
-    it('should log messages to the console', () => {
-        const message = 'Test log message';
-        const meta = { key: 'value' };
-
-        consoleLogger.write('info' as LogLevel, message, meta);
-        expect(consoleSpy).toHaveBeenCalledWith('[INFO]: Test log message', meta);
+    afterAll(() => {
+        consoleSpy.mockRestore();
     });
+
+    it('should exclude type and timestamp when configured', () => {
+        if (consoleLogger.configure) {
+            consoleLogger.configure({ output_type: false, output_timestamp: false });
+        }
+
+        const message = 'Minimal log message';
+
+        consoleLogger.write('info' as LogLevel, message);
+
+        expect(consoleSpy).toHaveBeenCalledWith('Minimal log message');
+    });
+
+    it('should include only the timestamp when type is disabled', () => {
+        if (consoleLogger.configure) {
+            consoleLogger.configure({ output_type: false, output_timestamp: true });
+        }
+
+        const message = 'Log with timestamp only';
+
+        consoleLogger.write('info' as LogLevel, message);
+
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z: Log with timestamp only$/)
+        );
+    });
+
+    it('should include only the type when timestamp is disabled', () => {
+        if (consoleLogger.configure) {
+            consoleLogger.configure({ output_type: true, output_timestamp: false });
+        }
+
+        const message = 'Log with type only';
+
+        consoleLogger.write('info' as LogLevel, message);
+
+        expect(consoleSpy).toHaveBeenCalledWith('[INFO]: Log with type only');
+    });
+
 });

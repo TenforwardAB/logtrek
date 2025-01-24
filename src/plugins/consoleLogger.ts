@@ -18,10 +18,42 @@
 
 import { LoggerPlugin, LogLevel } from '../types';
 
+let outputType = true; 
+let outputTimestamp = true; 
+
 const consoleLogger: LoggerPlugin = {
     pluginType: 'console',
+    configure: (options: Record<string, any>) => {
+        if (options.output_type !== undefined) {
+            outputType = options.output_type;
+        }
+        if (options.output_timestamp !== undefined) {
+            outputTimestamp = options.output_timestamp;
+        }
+    },
     write: (level: LogLevel, message: string, meta?: Record<string, any>) => {
-        console.log(`[${level.toUpperCase()}]: ${message}`, meta || '');
+        const timestamp = new Date().toISOString();
+        let logEntry = '';
+
+        if (outputType) {
+            logEntry += `[${level.toUpperCase()}]`;
+        }
+
+        if (outputTimestamp) {
+            logEntry += `${outputType ? '::' : ''}${timestamp}`;
+        }
+
+        if (logEntry) {
+            logEntry += ': ';
+        }
+
+        logEntry += message;
+
+        if (meta && Object.keys(meta).length > 0) {
+            logEntry += ` ${JSON.stringify(meta)}`;
+        }
+
+        console.log(logEntry);
     },
 };
 
